@@ -41,44 +41,12 @@
             color: #e67e22;
         }
 
-        /* POČÍTADLO */
+        /* IBA ČÍSLO NÁVŠTEVNÍKOV */
 
         #visitor-count {
-            display: flex;
-            align-items: center;
-            gap: 6px;
             color: white;
             font-size: 16px;
             font-weight: bold;
-        }
-
-        .visitor-icon {
-            width: 15px;
-            height: 18px;
-            position: relative;
-            display: inline-block;
-        }
-
-        .visitor-icon::before {
-            content: "";
-            position: absolute;
-            width: 7px;
-            height: 7px;
-            background: #e53935;
-            border-radius: 50%;
-            top: 0;
-            left: 4px;
-        }
-
-        .visitor-icon::after {
-            content: "";
-            position: absolute;
-            width: 15px;
-            height: 9px;
-            background: #e53935;
-            border-radius: 9px 9px 3px 3px;
-            bottom: 0;
-            left: 0;
         }
 
         .container {
@@ -200,7 +168,6 @@
         </div>
 
         <div id="visitor-count">
-            <span class="visitor-icon"></span>
             <span id="visitor-number">0</span>
         </div>
 
@@ -366,7 +333,7 @@ document
 
 
 /* =========================
-   POČÍTADLO NÁVŠTEVNÍKOV
+   POČÍTADLO
 ========================= */
 
 async function countVisitor() {
@@ -447,5 +414,3 @@ countVisitor();
 
 </body>
 </html>
-
-document.getElementById("visitor-number").textContent = count;
