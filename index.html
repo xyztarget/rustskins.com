@@ -41,11 +41,45 @@
             color: #e67e22;
         }
 
+        /* POČÍTADLO NÁVŠTEVNÍKOV */
         #visitor-count {
-            color: #888;
-            font-size: 13px;
-            margin-top: 4px;
-            text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .visitor-icon {
+            width: 16px;
+            height: 16px;
+            position: relative;
+            display: inline-block;
+        }
+
+        /* hlava */
+        .visitor-icon::before {
+            content: "";
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #e53935;
+            border-radius: 50%;
+            top: 0;
+            left: 5px;
+        }
+
+        /* telo */
+        .visitor-icon::after {
+            content: "";
+            position: absolute;
+            width: 14px;
+            height: 7px;
+            background: #e53935;
+            border-radius: 8px 8px 3px 3px;
+            bottom: 0;
+            left: 1px;
         }
 
         .container {
@@ -136,16 +170,12 @@
                 padding: 15px 20px;
             }
 
-            .header-content {
-                align-items: flex-start;
-            }
-
             .logo {
                 font-size: 24px;
             }
 
             #visitor-count {
-                font-size: 11px;
+                font-size: 14px;
             }
 
             .container {
@@ -163,21 +193,28 @@
 
 <header>
     <div class="header-content">
-        <div>
-            <div class="logo">Rust<span>Skins</span></div>
+
+        <div class="logo">
+            Rust<span>Skins</span>
         </div>
 
         <div id="visitor-count">
-            👥 0 visitors
+            <span class="visitor-icon"></span>
+            <span id="visitor-number">0</span>
         </div>
+
     </div>
 </header>
 
 <div class="container">
 
     <div class="hero">
+
         <h1>Rust Skins Database</h1>
-        <p>Browse Rust skins, prices and categories.</p>
+
+        <p>
+            Browse Rust skins, prices and categories.
+        </p>
 
         <input
             id="search"
@@ -185,9 +222,12 @@
             type="text"
             placeholder="Search for a skin..."
         >
+
     </div>
 
-    <div id="status">Loading skins...</div>
+    <div id="status">
+        Loading skins...
+    </div>
 
     <div id="skins" class="skins"></div>
 
@@ -196,119 +236,181 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const SUPABASE_URL = "https://nckagjgdvnswxldwjdsu.supabase.co";
-const SUPABASE_KEY = "sb_publishable_rtdelUWxxhn6alvssf4QVg_q6yLvPBs";
+
+const SUPABASE_URL =
+    "https://nckagjgdvnswxldwjdsu.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_rtdelUWxxhn6alvssf4QVg_q6yLvPBs";
+
 
 const supabaseClient = supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
 
+
 let allSkins = [];
 
+
 /* =========================
-   LOAD SKINS
+   NAČÍTANIE SKINOV
 ========================= */
 
 async function loadSkins() {
+
     const { data, error } = await supabaseClient
         .from("skins")
         .select("*")
         .order("name");
 
     if (error) {
+
         document.getElementById("status").textContent =
             "Chyba pri načítaní skinov.";
 
         console.error(error);
+
         return;
     }
 
     allSkins = data;
+
     displaySkins(data);
 }
 
+
 function displaySkins(skins) {
-    const container = document.getElementById("skins");
+
+    const container =
+        document.getElementById("skins");
+
 
     if (skins.length === 0) {
+
         container.innerHTML =
             "<p>Žiadne skiny zatiaľ nie sú v databáze.</p>";
 
         document.getElementById("status").textContent = "";
+
         return;
     }
 
+
     document.getElementById("status").textContent = "";
 
+
     container.innerHTML = skins.map(skin => `
+
         <div class="skin">
-            <img src="${skin.image_url}" alt="${skin.name}">
+
+            <img
+                src="${skin.image_url}"
+                alt="${skin.name}"
+            >
+
             <div class="skin-info">
-                <div class="skin-name">${skin.name}</div>
-                <div class="price">$${skin.price}</div>
+
+                <div class="skin-name">
+                    ${skin.name}
+                </div>
+
+                <div class="price">
+                    $${skin.price}
+                </div>
+
             </div>
+
         </div>
+
     `).join("");
 }
 
+
 /* =========================
-   SEARCH
+   VYHĽADÁVANIE
 ========================= */
 
-document.getElementById("search").addEventListener("input", function() {
-    const search = this.value.toLowerCase();
+document
+    .getElementById("search")
+    .addEventListener("input", function() {
 
-    const filtered = allSkins.filter(skin =>
-        skin.name.toLowerCase().includes(search)
-    );
+        const search =
+            this.value.toLowerCase();
 
-    displaySkins(filtered);
-});
+
+        const filtered =
+            allSkins.filter(skin =>
+                skin.name
+                    .toLowerCase()
+                    .includes(search)
+            );
+
+
+        displaySkins(filtered);
+
+    });
+
 
 /* =========================
-   VISITOR COUNTER
+   POČÍTADLO NÁVŠTEVNÍKOV
 ========================= */
 
 async function countVisitor() {
 
-    let visitorId = localStorage.getItem(
-        "rustskins_visitor_id"
-    );
+    let visitorId =
+        localStorage.getItem(
+            "rustskins_visitor_id"
+        );
 
-    // Nový návštevník
+
+    /* Nový návštevník */
+
     if (!visitorId) {
 
-        visitorId = crypto.randomUUID();
+        visitorId =
+            crypto.randomUUID();
+
 
         localStorage.setItem(
             "rustskins_visitor_id",
             visitorId
         );
 
-        const { error } = await supabaseClient
-            .from("visitors")
-            .insert({
-                visitor_id: visitorId
-            });
+
+        const { error } =
+            await supabaseClient
+                .from("visitors")
+                .insert({
+                    visitor_id: visitorId
+                });
+
 
         if (error) {
+
             console.error(
                 "Visitor insert error:",
                 error
             );
+
         }
+
     }
 
-    // Získanie celkového počtu
-    const { count, error } = await supabaseClient
-        .from("visitors")
-        .select("*", {
-            count: "exact",
-            head: true
-        });
+
+    /* Zistenie počtu */
+
+    const { count, error } =
+        await supabaseClient
+            .from("visitors")
+            .select("*", {
+                count: "exact",
+                head: true
+            });
+
 
     if (error) {
+
         console.error(
             "Visitor count error:",
             error
@@ -317,16 +419,20 @@ async function countVisitor() {
         return;
     }
 
+
     document.getElementById(
-        "visitor-count"
-    ).textContent = "👥 " + count + " visitors";
+        "visitor-number"
+    ).textContent = count;
+
 }
 
+
 /* =========================
-   START
+   SPUSTENIE
 ========================= */
 
 loadSkins();
+
 countVisitor();
 
 </script>
