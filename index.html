@@ -24,6 +24,14 @@
             border-bottom: 1px solid #292d31;
         }
 
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: auto;
+        }
+
         .logo {
             font-size: 28px;
             font-weight: bold;
@@ -31,6 +39,13 @@
 
         .logo span {
             color: #e67e22;
+        }
+
+        #visitor-count {
+            color: #888;
+            font-size: 13px;
+            margin-top: 4px;
+            text-align: right;
         }
 
         .container {
@@ -65,6 +80,10 @@
             font-size: 16px;
         }
 
+        .search::placeholder {
+            color: #777;
+        }
+
         .skins {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -76,6 +95,12 @@
             border: 1px solid #292d31;
             border-radius: 10px;
             overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .skin:hover {
+            transform: translateY(-3px);
+            border-color: #e67e22;
         }
 
         .skin img {
@@ -105,13 +130,47 @@
             color: #888;
             margin-bottom: 20px;
         }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 15px 20px;
+            }
+
+            .header-content {
+                align-items: flex-start;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+
+            #visitor-count {
+                font-size: 11px;
+            }
+
+            .container {
+                padding: 30px 15px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+        }
     </style>
 </head>
 
 <body>
 
 <header>
-    <div class="logo">Rust<span>Skins</span></div>
+    <div class="header-content">
+        <div>
+            <div class="logo">Rust<span>Skins</span></div>
+        </div>
+
+        <div id="visitor-count">
+            👥 0 visitors
+        </div>
+    </div>
 </header>
 
 <div class="container">
@@ -147,6 +206,10 @@ const supabaseClient = supabase.createClient(
 
 let allSkins = [];
 
+/* =========================
+   LOAD SKINS
+========================= */
+
 async function loadSkins() {
     const { data, error } = await supabaseClient
         .from("skins")
@@ -156,6 +219,7 @@ async function loadSkins() {
     if (error) {
         document.getElementById("status").textContent =
             "Chyba pri načítaní skinov.";
+
         console.error(error);
         return;
     }
@@ -168,7 +232,9 @@ function displaySkins(skins) {
     const container = document.getElementById("skins");
 
     if (skins.length === 0) {
-        container.innerHTML = "<p>Žiadne skiny zatiaľ nie sú v databáze.</p>";
+        container.innerHTML =
+            "<p>Žiadne skiny zatiaľ nie sú v databáze.</p>";
+
         document.getElementById("status").textContent = "";
         return;
     }
@@ -186,6 +252,10 @@ function displaySkins(skins) {
     `).join("");
 }
 
+/* =========================
+   SEARCH
+========================= */
+
 document.getElementById("search").addEventListener("input", function() {
     const search = this.value.toLowerCase();
 
@@ -196,7 +266,69 @@ document.getElementById("search").addEventListener("input", function() {
     displaySkins(filtered);
 });
 
+/* =========================
+   VISITOR COUNTER
+========================= */
+
+async function countVisitor() {
+
+    let visitorId = localStorage.getItem(
+        "rustskins_visitor_id"
+    );
+
+    // Nový návštevník
+    if (!visitorId) {
+
+        visitorId = crypto.randomUUID();
+
+        localStorage.setItem(
+            "rustskins_visitor_id",
+            visitorId
+        );
+
+        const { error } = await supabaseClient
+            .from("visitors")
+            .insert({
+                visitor_id: visitorId
+            });
+
+        if (error) {
+            console.error(
+                "Visitor insert error:",
+                error
+            );
+        }
+    }
+
+    // Získanie celkového počtu
+    const { count, error } = await supabaseClient
+        .from("visitors")
+        .select("*", {
+            count: "exact",
+            head: true
+        });
+
+    if (error) {
+        console.error(
+            "Visitor count error:",
+            error
+        );
+
+        return;
+    }
+
+    document.getElementById(
+        "visitor-count"
+    ).textContent = "👥 " + count + " visitors";
+}
+
+/* =========================
+   START
+========================= */
+
 loadSkins();
+countVisitor();
+
 </script>
 
 </body>
