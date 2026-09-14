@@ -41,45 +41,44 @@
             color: #e67e22;
         }
 
-        /* POČÍTADLO NÁVŠTEVNÍKOV */
+        /* POČÍTADLO */
+
         #visitor-count {
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 6px;
             color: white;
             font-size: 16px;
             font-weight: bold;
         }
 
         .visitor-icon {
-            width: 16px;
-            height: 16px;
+            width: 15px;
+            height: 18px;
             position: relative;
             display: inline-block;
         }
 
-        /* hlava */
         .visitor-icon::before {
             content: "";
             position: absolute;
-            width: 6px;
-            height: 6px;
+            width: 7px;
+            height: 7px;
             background: #e53935;
             border-radius: 50%;
             top: 0;
-            left: 5px;
+            left: 4px;
         }
 
-        /* telo */
         .visitor-icon::after {
             content: "";
             position: absolute;
-            width: 14px;
-            height: 7px;
+            width: 15px;
+            height: 9px;
             background: #e53935;
-            border-radius: 8px 8px 3px 3px;
+            border-radius: 9px 9px 3px 3px;
             bottom: 0;
-            left: 1px;
+            left: 0;
         }
 
         .container {
@@ -166,6 +165,7 @@
         }
 
         @media (max-width: 600px) {
+
             header {
                 padding: 15px 20px;
             }
@@ -192,6 +192,7 @@
 <body>
 
 <header>
+
     <div class="header-content">
 
         <div class="logo">
@@ -204,7 +205,9 @@
         </div>
 
     </div>
+
 </header>
+
 
 <div class="container">
 
@@ -225,13 +228,16 @@
 
     </div>
 
+
     <div id="status">
         Loading skins...
     </div>
 
+
     <div id="skins" class="skins"></div>
 
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -240,14 +246,16 @@
 const SUPABASE_URL =
     "https://nckagjgdvnswxldwjdsu.supabase.co";
 
+
 const SUPABASE_KEY =
     "sb_publishable_rtdelUWxxhn6alvssf4QVg_q6yLvPBs";
 
 
-const supabaseClient = supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
+const supabaseClient =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
 
 
 let allSkins = [];
@@ -259,10 +267,11 @@ let allSkins = [];
 
 async function loadSkins() {
 
-    const { data, error } = await supabaseClient
-        .from("skins")
-        .select("*")
-        .order("name");
+    const { data, error } =
+        await supabaseClient
+            .from("skins")
+            .select("*")
+            .order("name");
 
     if (error) {
 
@@ -280,11 +289,14 @@ async function loadSkins() {
 }
 
 
+/* =========================
+   ZOBRAZENIE SKINOV
+========================= */
+
 function displaySkins(skins) {
 
     const container =
         document.getElementById("skins");
-
 
     if (skins.length === 0) {
 
@@ -296,34 +308,33 @@ function displaySkins(skins) {
         return;
     }
 
-
     document.getElementById("status").textContent = "";
 
+    container.innerHTML =
+        skins.map(skin => `
 
-    container.innerHTML = skins.map(skin => `
+            <div class="skin">
 
-        <div class="skin">
+                <img
+                    src="${skin.image_url}"
+                    alt="${skin.name}"
+                >
 
-            <img
-                src="${skin.image_url}"
-                alt="${skin.name}"
-            >
+                <div class="skin-info">
 
-            <div class="skin-info">
+                    <div class="skin-name">
+                        ${skin.name}
+                    </div>
 
-                <div class="skin-name">
-                    ${skin.name}
-                </div>
+                    <div class="price">
+                        $${skin.price}
+                    </div>
 
-                <div class="price">
-                    $${skin.price}
                 </div>
 
             </div>
 
-        </div>
-
-    `).join("");
+        `).join("");
 }
 
 
@@ -333,23 +344,25 @@ function displaySkins(skins) {
 
 document
     .getElementById("search")
-    .addEventListener("input", function() {
+    .addEventListener(
+        "input",
+        function() {
 
-        const search =
-            this.value.toLowerCase();
+            const search =
+                this.value.toLowerCase();
 
+            const filtered =
+                allSkins.filter(
+                    skin =>
+                        skin.name
+                            .toLowerCase()
+                            .includes(search)
+                );
 
-        const filtered =
-            allSkins.filter(skin =>
-                skin.name
-                    .toLowerCase()
-                    .includes(search)
-            );
+            displaySkins(filtered);
 
-
-        displaySkins(filtered);
-
-    });
+        }
+    );
 
 
 /* =========================
@@ -364,13 +377,10 @@ async function countVisitor() {
         );
 
 
-    /* Nový návštevník */
-
     if (!visitorId) {
 
         visitorId =
             crypto.randomUUID();
-
 
         localStorage.setItem(
             "rustskins_visitor_id",
@@ -397,8 +407,6 @@ async function countVisitor() {
 
     }
 
-
-    /* Zistenie počtu */
 
     const { count, error } =
         await supabaseClient
@@ -439,12 +447,3 @@ countVisitor();
 
 </body>
 </html>
-
-<div id="visitor-count">
-    <span class="visitor-icon"></span>
-    <span id="visitor-number">0</span>
-</div>
-
-document.getElementById(
-    "visitor-number"
-).textContent = count;
